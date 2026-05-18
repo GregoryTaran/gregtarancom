@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Scrollable Swipe Demo</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+html,body{
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:#000;
+}
+
+.viewport{
+  position:relative;
+  width:100vw;
+  height:100dvh;
+  overflow:hidden;
+  touch-action:none;
+}
+
+.track{
+  position:absolute;
+  left:0;
+  top:0;
+  width:200vw;
+  height:100%;
+  display:flex;
+  will-change:transform;
+}
+
+.screen{
+  width:100vw;
+  height:100%;
+  flex:0 0 100vw;
+  position:relative;
+}
+
+/* ЛЕВАЯ СТРАНИЦА */
+
+/* 
+  ФОТО:
+  Положи рядом с этим HTML файл: gregory-photo.jpg
+
+  Лучшие пропорции:
+  - вертикальное фото 4:5 или 3:4
+  - минимум 1200px по высоте
+  - примеры: 1080x1350 или 1200x1600
+
+  Код сам обрежет фото:
+  - слева как обложку на весь экран
+  - справа как квадратный портрет
+*/
+
+.hero-screen{
+  overflow:hidden;
+  background:
+    linear-gradient(rgba(0,0,0,.28),rgba(0,0,0,.28)),
+    url("gregory-photo.jpg");
+  background-size:cover;
+  background-position:center;
+}
+
+.hero-overlay{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:flex-end;
+  padding:30px;
+}
+
+.hero-box{
+  color:white;
+  text-shadow:0 4px 18px rgba(0,0,0,.45);
+
+  background:rgba(0,0,0,.38);
+  backdrop-filter:blur(2px);
+
+  padding:24px;
+  border-radius:6px;
+
+  max-width:420px;
+}
+
+.hero-title{
+  font-size:42px;
+  line-height:.95;
+  font-weight:900;
+  letter-spacing:-0.06em;
+}
+
+.hero-text{
+  margin-top:16px;
+  max-width:320px;
+  font-size:15px;
+  line-height:1.45;
+  opacity:.95;
+}
+
+/* ПРАВАЯ СТРАНИЦА */
+
+.info-screen{
+  background:white;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
+
+.info-content{
+  padding:38px 24px 120px;
+}
+
+.avatar{
+  width:150px;
+  height:150px;
+  border-radius:30px;
+  overflow:hidden;
+  margin:0 auto;
+  box-shadow:0 18px 40px rgba(0,0,0,.14);
+}
+
+.avatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.info-title{
+  margin-top:28px;
+  text-align:center;
+  font-size:36px;
+  line-height:1;
+  font-weight:900;
+  letter-spacing:-0.05em;
+}
+
+.info-subtitle{
+  margin-top:12px;
+  text-align:center;
+  font-size:15px;
+  opacity:.6;
+}
+
+.text-block{
+  margin-top:34px;
+}
+
+.text-block p{
+  font-size:17px;
+  line-height:1.7;
+  color:#222;
+}
+
+.text-block p + p{
+  margin-top:22px;
+}
+
+.phone-card{
+  margin-top:34px;
+  padding:22px;
+  border-radius:28px;
+  background:#f4f4f4;
+}
+
+.phone-label{
+  font-size:12px;
+  letter-spacing:.08em;
+  opacity:.5;
+}
+
+.phone-number{
+  margin-top:8px;
+  font-size:28px;
+  font-weight:900;
+  letter-spacing:-0.04em;
+}
+
+.end-note{
+  margin-top:40px;
+  text-align:center;
+  font-size:14px;
+  opacity:.55;
+}
+
+/* КНОПКА */
+
+.drag-button{
+  position:fixed;
+  top:50%;
+  left:calc(100vw - 42px);
+  transform:translate(-50%,-50%);
+  width:84px;
+  height:84px;
+  border:none;
+  border-radius:999px;
+  z-index:999;
+  cursor:grab;
+  touch-action:none;
+  overflow:hidden;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255,255,255,.5),
+      rgba(240,240,240,.2)
+    );
+
+  box-shadow:
+    0 22px 50px rgba(0,0,0,.28),
+    0 8px 20px rgba(0,0,0,.12),
+    inset 0 2px 4px rgba(255,255,255,.95),
+    inset 0 -8px 18px rgba(0,0,0,.08);
+}
+
+.drag-button::before{
+  content:"";
+  position:absolute;
+  inset:10px;
+  border-radius:999px;
+
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(255,255,255,.95),
+      rgba(255,255,255,.18)
+    );
+
+  border:1px solid rgba(255,255,255,.22);
+
+  box-shadow:
+    inset 0 0 14px rgba(255,255,255,.55);
+}
+
+.drag-button:hover{
+  transform:
+    translate(-50%,-50%)
+    scale(1.03);
+}
+
+.drag-button:active{
+  transform:
+    translate(-50%,-50%)
+    scale(.96);
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="viewport" id="viewport">
+
+  <div class="track" id="track">
+
+    <!-- ЛЕВЫЙ ЭКРАН -->
+
+    <section class="screen hero-screen">
+
+      <div class="hero-overlay">
+
+        <div class="hero-box">
+
+          <div class="hero-title">
+            ГРИГОРИЙ<br>ТАРАН
+          </div>
+
+          <div class="hero-text">
+            Путь и практика внутренней согласованности и реализации. Не попытка стать идеальным человеком, а практика жить более цельно, осознанно, счастливо и содержательно — в согласии с собой, телом, реальностью и своими решениями.
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ПРАВЫЙ ЭКРАН -->
+
+    <section class="screen info-screen">
+
+      <div class="info-content">
+
+        <div class="avatar">
+          <img src="gregory-photo.jpg" alt="Григорий Таран">
+        </div>
+
+        <div class="info-title">
+          Авторство человека
+        </div>
+
+        <div class="info-subtitle">
+          эссе о праве жить изнутри наружу
+        </div>
+
+        <div class="text-block">
+
+          <p>
+            Авторство начинается не с таланта, профессии или публичного признания. Оно начинается в тот момент, когда человек перестаёт жить так, будто его жизнь уже кем-то написана заранее. Пока человек только реагирует, приспосабливается, оправдывается, спасается или ждёт разрешения, он может быть умным, сильным, успешным, но внутри всё равно оставаться не у руля. Авторство — это возвращение за руль собственной жизни.
+          </p>
+
+          <p>
+            Быть автором — не значит контролировать всё. Мир больше человека. В нём есть случайности, потери, ограничения, чужие решения, усталость, прошлое, тело, время. Авторство не отменяет реальность. Наоборот, оно начинается с согласия увидеть реальность такой, какая она есть. Не приукрашивать её, не воевать с ней бесконечно, не требовать, чтобы она немедленно стала удобной. 
+          </p>
+
+          <p>
+            Человек становится автором, когда начинает отличать свою внутреннюю правду от шума. От страха, от привычки, от ожиданий других людей, от старых сценариев, от желания понравиться, от автоматических реакций. Внутренняя правда редко звучит громко. Она не всегда героическая. Иногда она очень простая: я устал. Я хочу иначе. Мне больно. Я больше не хочу предавать себя. Я готов сделать маленький шаг.
+          </p>
+
+          <p>
+            Авторство — это не красивая поза. Это ежедневная практика согласованности. Думать одно и делать другое — тяжело. Хотеть одного и всё время выбирать противоположное — разрушительно. Говорить себе неправду — дорого. Поэтому авторство требует честности, но не жестокости. Человек не становится автором через насилие над собой. Он становится автором через ясность, бережность и ответственность.
+          </p>
+
+          <p>
+            Ответственность в этом смысле — не вина. Это согласие признать своё влияние. Пусть даже маленькое. Пусть даже сегодня влияние — это только не сорваться, не убежать, не обесценить себя, не отложить жизнь ещё на один день. Автор не обязан сразу построить великую судьбу. Но он может перестать жить так, будто его выбора не существует.
+          </p>
+
+          <p>
+            Самое важное в авторстве — право на собственную линию. Не чужую идеальную жизнь, не правильную биографию, не сценарий, который должен кому-то понравиться. У каждого человека есть внутренняя форма. Свой ритм, своя глубина, своя боль, своя сила, свой способ любить, работать, ошибаться, начинать заново. Авторство — это когда человек постепенно перестаёт стыдиться этой формы и начинает строить жизнь из неё.
+          </p>
+
+          <p>
+            Автор — это не тот, кто всегда уверен. Автор — это тот, кто возвращается. К себе. К телу. К настоящему моменту. К своему решению. К правде. К действию. Он может сомневаться, падать, злиться, уставать, путаться. Но внутри у него появляется точка: моя жизнь не происходит мимо меня. Я участвую. Я выбираю. Я отвечаю. Я имею право быть на своей стороне.
+          </p>
+
+          <p>
+            И, возможно, именно с этого начинается настоящая зрелость человека: не с громких обещаний стать лучше, а с тихого внутреннего согласия больше не исчезать из собственной жизни.
+          </p>
+
+        </div>
+
+        <div class="phone-card">
+
+          <div class="phone-label">
+            СВЯЗЬ
+          </div>
+
+          <div class="phone-number">
+            +353 000 000 000
+          </div>
+
+        </div>
+
+        <div class="end-note">
+          ГРИГОРИЙ ТАРАН · ПУТЬ АВТОРА
+        </div>
+
+      </div>
+
+
+    </section>
+
+  </div>
+
+</div>
+
+<button class="drag-button" id="dragButton"></button>
+<script>
+const viewport = document.getElementById('viewport');
+const track = document.getElementById('track');
+const button = document.getElementById('dragButton');
+
+let dragging = false;
+let startX = 0;
+let startTranslate = 0;
+let currentTranslate = 0;
+let currentScreen = 0;
+
+function getWidth(){
+  return viewport.getBoundingClientRect().width;
+}
+
+function clamp(v,min,max){
+  return Math.min(Math.max(v,min),max);
+}
+
+function setTransition(on){
+  track.style.transition = on
+    ? 'transform .28s cubic-bezier(.22,.8,.25,1)'
+    : 'none';
+
+  button.style.transition = on
+    ? 'left .28s cubic-bezier(.22,.8,.25,1)'
+    : 'none';
+}
+
+function render(value){
+  const w = getWidth();
+
+  currentTranslate = clamp(value, -w, 0);
+
+  track.style.transform =
+    `translateX(${currentTranslate}px)`;
+
+  const progress =
+    Math.abs(currentTranslate) / w;
+
+  const buttonX =
+    (w - 40) - progress * (w - 80);
+
+  button.style.left = buttonX + 'px';
+}
+
+function snapTo(index){
+  const w = getWidth();
+
+  currentScreen = index;
+
+  setTransition(true);
+
+  render(index === 0 ? 0 : -w);
+
+  button.classList.toggle(
+    'is-left',
+    currentScreen === 1
+  );
+}
+
+function startDrag(e){
+  dragging = true;
+
+  startX = e.clientX;
+  startTranslate = currentTranslate;
+
+  setTransition(false);
+
+  button.setPointerCapture(e.pointerId);
+}
+
+function moveDrag(e){
+  if(!dragging) return;
+
+  const dx = e.clientX - startX;
+
+  render(startTranslate + dx);
+}
+
+function endDrag(e){
+  if(!dragging) return;
+
+  dragging = false;
+
+  const w = getWidth();
+
+  const progress =
+    Math.abs(currentTranslate) / w;
+
+  if(progress > .5){
+    snapTo(1);
+  }else{
+    snapTo(0);
+  }
+
+  try{
+    button.releasePointerCapture(e.pointerId);
+  }catch(err){}
+}
+
+button.addEventListener(
+  'pointerdown',
+  startDrag
+);
+
+window.addEventListener(
+  'pointermove',
+  moveDrag
+);
+
+window.addEventListener(
+  'pointerup',
+  endDrag
+);
+
+window.addEventListener(
+  'pointercancel',
+  endDrag
+);
+
+window.addEventListener('resize',()=>{
+  snapTo(currentScreen);
+});
+
+snapTo(0);
+</script>
+
+</body>
+</html>
