@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Подписка</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400;700&display=swap" rel="stylesheet">
+
+  <style>
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      background: #ffffff;
+      overflow: hidden;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      position: relative;
+      cursor: text;
+    }
+
+    form {
+      width: 100%;
+      text-align: center;
+    }
+
+    .question {
+      position: absolute;
+      top: 10vh;
+      left: 50%;
+      transform: translateX(-50%);
+
+      width: 100%;
+
+      font-size: 20px;
+      font-weight: 200;
+      text-transform: uppercase;
+      letter-spacing: 0.35em;
+      color: #000;
+    }
+
+    .fake-line {
+      position: absolute;
+      top: 15vh;
+      left: 50%;
+      transform: translateX(-50%);
+
+      width: 100%;
+
+      font-size: 30px;
+      font-weight: 200;
+      line-height: 1.4;
+      color: #000;
+
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .cursor {
+      display: inline-block;
+      animation: blink 0.45s infinite;
+    }
+
+    @keyframes blink {
+      0%, 50% {
+        opacity: 1;
+      }
+
+      51%, 100% {
+        opacity: 0;
+      }
+    }
+
+    .hidden-input {
+      display: block;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      border: none;
+      outline: none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <form id="form">
+
+    <div class="question" id="question">
+      ХОЧЕШЬ ТАКОЕ ПО ПОЧТЕ?
+    </div>
+
+    <div class="fake-line">
+      <span id="typedText"></span><span id="cursor" class="cursor">|</span>
+    </div>
+
+    <input
+      id="emailInput"
+      class="hidden-input"
+      type="email"
+      inputmode="email"
+      autocomplete="email"
+      enterkeyhint="send"
+    />
+
+  </form>
+
+  <script>
+    const form = document.getElementById('form');
+    const input = document.getElementById('emailInput');
+    const typedText = document.getElementById('typedText');
+    const question = document.getElementById('question');
+    const cursor = document.getElementById('cursor');
+
+    let completed = false;
+
+    function activateInput() {
+      if (completed) return;
+      input.focus();
+    }
+
+    function finish() {
+      completed = true;
+
+      question.textContent = 'Я ОТПРАВИЛ ТЕБЕ ПИСЬМО)';
+      typedText.textContent = '';
+      cursor.style.display = 'none';
+
+      input.blur();
+    }
+
+    document.addEventListener('click', activateInput);
+
+    input.addEventListener('input', () => {
+      if (completed) return;
+
+      typedText.textContent = input.value;
+    });
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      if (input.value.trim() !== '') {
+        finish();
+      }
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+
+        if (input.value.trim() !== '') {
+          finish();
+        }
+      }
+    });
+  </script>
+
+</body>
+</html>
