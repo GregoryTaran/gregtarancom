@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Подписка</title>
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: #fff;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .screen {
+      text-align: center;
+      cursor: text;
+      user-select: none;
+    }
+
+    .question {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: #000;
+      margin-bottom: 18px;
+    }
+
+    .fake-line {
+      font-size: 28px;
+      color: #000;
+      min-height: 36px;
+      white-space: pre;
+    }
+
+    .cursor {
+      display: inline-block;
+      animation: blink 1s infinite;
+    }
+
+    .cursor.fast {
+      animation: blink 0.45s infinite;
+    }
+
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+
+    .hidden-input {
+      position: fixed;
+      left: -9999px;
+      top: -9999px;
+      opacity: 0;
+      width: 1px;
+      height: 1px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="screen" id="screen">
+    <div class="question">ХОЧЕШЬ ТАКОЕ ПО ПОЧТЕ?</div>
+    <div class="fake-line">
+      <span id="typedText"></span><span id="cursor" class="cursor">|</span>
+    </div>
+  </div>
+
+  <input
+    id="emailInput"
+    class="hidden-input"
+    type="email"
+    inputmode="email"
+    autocomplete="email"
+  />
+
+  <script>
+    const screen = document.getElementById('screen');
+    const input = document.getElementById('emailInput');
+    const typedText = document.getElementById('typedText');
+    const cursor = document.getElementById('cursor');
+
+    function activateInput() {
+      input.focus();
+      cursor.classList.add('fast');
+    }
+
+    screen.addEventListener('click', activateInput);
+
+    input.addEventListener('focus', () => {
+      cursor.classList.add('fast');
+    });
+
+    input.addEventListener('blur', () => {
+      cursor.classList.remove('fast');
+    });
+
+    input.addEventListener('input', () => {
+      typedText.textContent = input.value;
+    });
+  </script>
+
+</body>
+</html>
